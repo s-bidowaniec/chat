@@ -77,7 +77,9 @@ p {
 .message--self {
     align-items: flex-end;
 }
-
+.message--chat {
+    font-style: italic;
+}
 .message--received {
     animation: fadeIn;
     animation-duration: 3s;

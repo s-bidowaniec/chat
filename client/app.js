@@ -1,3 +1,4 @@
+import { io } from 'https://cdn.socket.io/4.4.1/socket.io.esm.min.js';
 const loginForm = document.getElementById('welcome-form');
 const messagesSection = document.getElementById('messages-section');
 const messagesList = document.getElementById('messages-list');
@@ -5,18 +6,20 @@ const addMessageForm = document.getElementById('add-messages-form');
 const userNameInput = document.getElementById('username');
 const messageContentInput = document.getElementById('message-content');
 let userName = ''
+const socket = io();
+socket.on('message', ({ author, content }) => addMessage(author, content))
 
 // Validators
 const validate = (name) => {
     const notEmpty = name !== '';
     return notEmpty
 }
-
 // User login form
 const login = (e) => {
     e.preventDefault()
     if (validate(userNameInput.value)){
         userName = userNameInput.value
+        socket.emit('login', userName)
         loginForm.classList.toggle('show')
         messagesSection.classList.toggle('show')
     } else {
@@ -34,6 +37,9 @@ const addMessage = (author, message) => {
     if (author === userName) {
         messageHTML.classList.add("message--self");
         header.innerText = 'You'
+    } else if (author === 'Chat Bot'){
+        messageHTML.classList.add("message--chat");
+        header.innerText = author
     } else {
         header.innerText = author
     }
@@ -49,9 +55,11 @@ const sendMessage = (e) => {
     if (validate(messageContentInput.value)){
         const message = messageContentInput.value
         addMessage(userName, message)
+        socket.emit('message', { author: userName, content: message })
         messageContentInput.value = ''
     } else {
         alert("Message is not valid!");
     }
 }
+
 addMessageForm.addEventListener('submit', sendMessage)
